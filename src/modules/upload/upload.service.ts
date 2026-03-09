@@ -32,32 +32,27 @@ export async function uploadAndCreateMedia(
     file.originalname
   );
 
-  // Create base data object - Use null instead of letting undefined pass through
-  const createData: Prisma.MediaUncheckedCreateInput = {
-    imagekitFileId: fileId,
-    title: data.title ?? null,
-    description: data.description ?? null,
-    mediaType: data.mediaType as any,
-    fileUrl: url,
-    thumbnailUrl: thumbnailUrl ?? null,
-    previewUrl: url,
-    width: width,
-    height: height,
-    fileSize: file.size,
-  };
+  // 1. Define the base object with nulls instead of undefined
+// 2. Explicitly type it as the Unchecked version
+const createData: Prisma.MediaUncheckedCreateInput = {
+  imagekitFileId: fileId,
+  title: data.title ?? null,
+  description: data.description ?? null,
+  mediaType: data.mediaType as any,
+  fileUrl: url,
+  thumbnailUrl: thumbnailUrl ?? null,
+  previewUrl: url,
+  width: width,
+  height: height,
+  fileSize: file.size,
+  // Use a ternary here so it is NEVER 'undefined'
+  categoryId: data.categoryId ? BigInt(data.categoryId) : null,
+};
 
-  if (data.categoryId) {
-    createData.categoryId = BigInt(data.categoryId);
-  } else {
-    // If the DB column is nullable, set to null. 
-    // If it's optional in the schema, just leave it off.
-    createData.categoryId = null;
-  }
 
-  // Create media
-  const media = await prisma.media.create({
-    data: createData
-  });
+const media = await prisma.media.create({
+  data: createData
+});
 
   // Handle relations
   await handleTags(media.id, data.tags);
