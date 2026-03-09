@@ -32,7 +32,7 @@ export async function uploadAndCreateMedia(
     file.originalname
   );
 
-  // Create base data object
+  // Create base data object - Use null instead of letting undefined pass through
   const createData: Prisma.MediaUncheckedCreateInput = {
     imagekitFileId: fileId,
     title: data.title ?? null,
@@ -41,14 +41,17 @@ export async function uploadAndCreateMedia(
     fileUrl: url,
     thumbnailUrl: thumbnailUrl ?? null,
     previewUrl: url,
-    width,
-    height,
-    fileSize: file.size
+    width: width,
+    height: height,
+    fileSize: file.size,
   };
 
-  // Only attach categoryId if provided
   if (data.categoryId) {
-    (createData as any).categoryId = BigInt(data.categoryId);
+    createData.categoryId = BigInt(data.categoryId);
+  } else {
+    // If the DB column is nullable, set to null. 
+    // If it's optional in the schema, just leave it off.
+    createData.categoryId = null;
   }
 
   // Create media
