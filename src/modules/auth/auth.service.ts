@@ -1,4 +1,4 @@
-import { prisma } from '../../config/database.ts';
+import { prisma } from '../../config/database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
