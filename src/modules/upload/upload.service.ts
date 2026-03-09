@@ -29,25 +29,31 @@ export async function uploadAndCreateMedia(
   const { fileId, url, thumbnailUrl } =
     await uploadToImageKit(file, file.originalname);
 
+  // Build create data object safely
+  const createData: any = {
+    imagekitFileId: fileId,
+    title: data.title,
+    description: data.description,
+    mediaType: data.mediaType as any,
+    fileUrl: url,
+    thumbnailUrl,
+    previewUrl: url,
+    width,
+    height,
+    fileSize: file.size
+  };
+
+  // Only add categoryId if provided
+  if (data.categoryId) {
+    createData.categoryId = BigInt(data.categoryId);
+  }
+
   // Create media record
   const media = await prisma.media.create({
-    data: {
-      imagekitFileId: fileId,
-      title: data.title,
-      description: data.description,
-      mediaType: data.mediaType as any,
-      fileUrl: url,
-      thumbnailUrl,
-      previewUrl: url,
-      width,
-      height,
-      fileSize: file.size,
-      categoryId: data.categoryId
-        ? BigInt(data.categoryId)
-        : undefined
-    }
+    data: createData
   });
 
+  // Handle relations
   await handleTags(media.id, data.tags);
   await handleEmotions(media.id, data.emotions);
 
