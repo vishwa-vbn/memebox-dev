@@ -1,10 +1,9 @@
 import app from './app';
 
-const port = parseInt(process.env.PORT || '3000');
-
-// Only run app.listen if we are NOT on Vercel
+// For local development
 if (process.env.NODE_ENV !== 'production') {
-  app.listen({ port }, (err) => {
+  const port = parseInt(process.env.PORT || '3000');
+  app.listen({ port, host: '0.0.0.0' }, (err) => {
     if (err) {
       app.log.error(err);
       process.exit(1);
@@ -13,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// CRITICAL: Export for Vercel
+// CRITICAL: Vercel Serverless Function Handler
 export default async (req: any, res: any) => {
   await app.ready();
   app.server.emit('request', req, res);
