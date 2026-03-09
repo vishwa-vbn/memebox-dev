@@ -1,6 +1,7 @@
 import { prisma } from "../../config/database";
 import { uploadToImageKit } from "../../services/imagekit.service";
 import sharp from "sharp";
+import { Prisma } from "@prisma/client";
 
 export async function uploadAndCreateMedia(
   file: any,
@@ -13,42 +14,44 @@ export async function uploadAndCreateMedia(
     categoryId?: string;
   }
 ) {
-  // Extract metadata using sharp
   let width: number | null = null;
   let height: number | null = null;
 
+  // Extract metadata using sharp
   try {
     const metadata = await sharp(file.buffer).metadata();
     width = metadata.width ?? null;
     height = metadata.height ?? null;
-  } catch (err) {
+  } catch {
     console.warn("Sharp metadata extraction failed");
   }
 
-  // Upload to ImageKit
-  const { fileId, url, thumbnailUrl } =
-    await uploadToImageKit(file, file.originalname);
+  // Upload file to ImageKit
+  const { fileId, url, thumbnailUrl } = await uploadToImageKit(
+    file,
+    file.originalname
+  );
 
-  // Build create data object safely
-  const createData: any = {
+  // Create base data object
+  const createData: Prisma.MediaUncheckedCreateInput = {
     imagekitFileId: fileId,
-    title: data.title,
-    description: data.description,
+    title: data.title ?? null,
+    description: data.description ?? null,
     mediaType: data.mediaType as any,
     fileUrl: url,
-    thumbnailUrl,
+    thumbnailUrl: thumbnailUrl ?? null,
     previewUrl: url,
     width,
     height,
     fileSize: file.size
   };
 
-  // Only add categoryId if provided
+  // Only attach categoryId if provided
   if (data.categoryId) {
-    createData.categoryId = BigInt(data.categoryId);
+    (createData as any).categoryId = BigInt(data.categoryId);
   }
 
-  // Create media record
+  // Create media
   const media = await prisma.media.create({
     data: createData
   });
