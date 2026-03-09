@@ -1,4 +1,4 @@
-import { prisma } from '../config/database';
+import { prisma } from '../config/database.js';
 
 export async function searchMedia(query: string, page: number, limit: number) {
   const skip = (page - 1) * limit;

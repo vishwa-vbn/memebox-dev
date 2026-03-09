@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import * as service from './categories.service';
+import * as service from './categories.service.js';
 
 export async function getAllCategories(req: FastifyRequest, reply: FastifyReply) {
   const categories = await service.getAllCategories();

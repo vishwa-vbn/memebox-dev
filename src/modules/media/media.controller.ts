@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import * as service from './media.service';
+import * as service from './media.service.js';
 
 export async function getTrending(req: FastifyRequest, reply: FastifyReply) {
   const trending = await service.getTrendingMedia();

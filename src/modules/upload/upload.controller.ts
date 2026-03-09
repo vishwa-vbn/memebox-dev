@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import * as service from "./upload.service";
+import * as service from "./upload.service.js";
 
 export async function uploadMedia(
   req: FastifyRequest,

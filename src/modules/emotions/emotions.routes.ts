@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import * as controller from './emotions.controller';
+import * as controller from './emotions.controller.js';
 
 export default async function emotionsRoutes(app: FastifyInstance) {
 

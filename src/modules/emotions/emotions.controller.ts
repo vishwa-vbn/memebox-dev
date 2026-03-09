@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import * as service from './emotions.service';
+import * as service from './emotions.service.js';
 
 export async function getAllEmotions(req: FastifyRequest, reply: FastifyReply) {
   const emotions = await service.getAllEmotions();

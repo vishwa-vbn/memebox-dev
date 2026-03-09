@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import * as service from "./admin.service";
+import * as service from "./admin.service.js";
 
 /**
  * Get all media uploaded

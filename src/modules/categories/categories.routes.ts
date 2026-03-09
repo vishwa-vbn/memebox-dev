@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import * as controller from './categories.controller';
+import * as controller from './categories.controller.js';
 
 export default async function categoriesRoutes(app: FastifyInstance) {
   // Public

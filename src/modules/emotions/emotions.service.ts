@@ -1,4 +1,4 @@
-import { prisma } from '../../config/database';
+import { prisma } from '../../config/database.js';
 
 export async function getAllEmotions() {
   return prisma.emotion.findMany({

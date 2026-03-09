@@ -1,5 +1,5 @@
-import { prisma } from "../../config/database";
-import { uploadToImageKit } from "../../services/imagekit.service";
+import { prisma } from "../../config/database.js";
+import { uploadToImageKit } from "../../services/imagekit.service.js";
 import sharp from "sharp";
 import { Prisma } from "@prisma/client";
 

@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import * as service from './tags.service';
+import * as service from './tags.service.js';
 
 export async function getPopularTags(req: FastifyRequest, reply: FastifyReply) {
   const tags = await service.getPopularTags();

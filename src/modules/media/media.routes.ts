@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import * as controller from './media.controller';
+import * as controller from './media.controller.js';
 
 export default async function mediaRoutes(app: FastifyInstance) {
   app.get('/trending', controller.getTrending);

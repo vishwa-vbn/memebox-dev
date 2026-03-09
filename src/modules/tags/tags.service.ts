@@ -1,4 +1,4 @@
-import { prisma } from '../../config/database';
+import { prisma } from '../../config/database.js';
 
 export async function getPopularTags(take = 50) {
   return prisma.tag.findMany({

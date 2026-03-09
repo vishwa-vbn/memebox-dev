@@ -4,15 +4,15 @@ import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import fastifyMultipart from '@fastify/multipart';
 
-import authRoutes from './modules/auth/auth.routes';
-import mediaRoutes from './modules/media/media.routes';
-import uploadRoutes from './modules/upload/upload.routes';
-import searchRoutes from './modules/search/search.routes';
-import adminRoutes from './modules/admin/admin.routes';
-import tagsRoutes from './modules/tags/tags.routes';
-import categoriesRoutes from './modules/categories/categories.routes';
-import emotionsRoutes from './modules/emotions/emotions.routes';
-import { authMiddleware } from './middleware/auth.middleware';
+import authRoutes from './modules/auth/auth.routes.js';
+import mediaRoutes from './modules/media/media.routes.js';
+import uploadRoutes from './modules/upload/upload.routes.js';
+import searchRoutes from './modules/search/search.routes.js';
+import adminRoutes from './modules/admin/admin.routes.js';
+import tagsRoutes from './modules/tags/tags.routes.js';
+import categoriesRoutes from './modules/categories/categories.routes.js';
+import emotionsRoutes from './modules/emotions/emotions.routes.js';
+import { authMiddleware } from './middleware/auth.middleware.js';
 
 dotenv.config();
 

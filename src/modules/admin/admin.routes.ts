@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import * as controller from "./admin.controller";
+import * as controller from "./admin.controller.js";
 
 export default async function adminRoutes(app: FastifyInstance) {
   app.get("/media", { preHandler: [checkAdmin] }, controller.getAllMedia);

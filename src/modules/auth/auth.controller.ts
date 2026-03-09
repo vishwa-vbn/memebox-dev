@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import * as service from './auth.service';
+import * as service from './auth.service.js';
 
 export async function register(
   req: FastifyRequest<{ Body: { email: string; password: string } }>,

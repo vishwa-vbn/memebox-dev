@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import * as controller from './tags.controller';
+import * as controller from './tags.controller.js';
 
 export default async function tagsRoutes(app: FastifyInstance) {
   app.get('/', controller.getPopularTags);
