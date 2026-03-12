@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
- "scripts": {
-  "build": "prisma generate",
-  "vercel-build": "prisma generate", 
-  "dev": "tsx src/server.ts",
-  "start": "node dist/server.js"
-},
+  "scripts": {
+    "build": "prisma generate",
+    "vercel-build": "prisma generate",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^25.3.5",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {

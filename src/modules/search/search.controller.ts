@@ -1,15 +1,98 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import * as service from '../../services/search.service.js';
 
+interface SearchQuerystring {
+  q?: string;
+  emotion?: string;
+  category?: string;
+  tag?: string;        // comma-separated: "funny,cat,painter"
+  mediaType?: string;  // "GIF" | "STICKER" | "MEME"
+  page?: string;
+  limit?: string;
+  nsfw?: string;       // "true" | "false"
+}
+
+// Normalize: trim + convert empty string to undefined
+function normalize(value: string | undefined): string | undefined {
+  const v = value?.trim();
+  return v === '' ? undefined : v;
+}
+
 export async function search(
-  req: FastifyRequest<{ Querystring: { q: string; page?: string; limit?: string } }>,
+  req: FastifyRequest<{ Querystring: SearchQuerystring }>,
   reply: FastifyReply
 ) {
-  const q = req.query.q;
-  const page = Number(req.query.page ?? 1);
-  const limit = Number(req.query.limit ?? 10);
+  try {
+    const {
+      q,
+      emotion,
+      category,
+      tag,
+      mediaType,
+      page: pageStr,
+      limit: limitStr,
+      nsfw: nsfwStr
+    } = req.query;
 
-  const results = await service.searchMedia(q, page, limit);
+    // --- Normalize all string filters (empty string → undefined) ---
+    const normQ        = normalize(q);
+    const normEmotion  = normalize(emotion);
+    const normCategory = normalize(category);
+    const normType     = normalize(mediaType)?.toUpperCase();
 
-  reply.send(results);
+    // --- Parse comma-separated tags, drop empty entries ---
+    const tags = tag
+      ? tag.split(',').map(t => t.trim()).filter(Boolean)
+      : [];
+
+    // --- Parse pagination ---
+    const page  = Math.max(1,   parseInt(pageStr  ?? '1',  10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(limitStr ?? '20', 10) || 20));
+
+    // --- Parse nsfw flag ---
+    const nsfw = nsfwStr === 'true';
+
+    // --- Validate: at least one real filter must be present ---
+    const hasFilters =
+      normQ ||
+      normEmotion ||
+      normCategory ||
+      normType ||
+      tags.length > 0;
+
+    if (!hasFilters) {
+      return reply.status(400).send({
+        error: 'Bad Request',
+        message:
+          'At least one search parameter is required: q, emotion, category, tag, or mediaType'
+      });
+    }
+
+    // --- Validate mediaType if provided ---
+    if (normType && !['GIF', 'STICKER', 'MEME'].includes(normType)) {
+      return reply.status(400).send({
+        error: 'Bad Request',
+        message: `Invalid mediaType "${normType}". Allowed values: GIF, STICKER, MEME`
+      });
+    }
+
+    const results = await service.searchMedia({
+      q:         normQ,
+      emotion:   normEmotion,
+      category:  normCategory,
+      tags,
+      mediaType: normType,
+      nsfw,
+      page,
+      limit
+    });
+
+    return reply.status(200).send(results);
+  } catch (err: any) {
+    req.log.error({ err }, 'Search controller error');
+    return reply.status(500).send({
+      error: 'Internal Server Error',
+      message: 'An unexpected error occurred while processing your search.'
+    });
+  }
 }
