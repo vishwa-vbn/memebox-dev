@@ -85,6 +85,7 @@ import crypto from 'crypto';
 
 declare module 'fastify' {
   interface FastifyRequest {
+    user: any;
     ipInfo?: {
       ip: string;
       fingerprint: string;
