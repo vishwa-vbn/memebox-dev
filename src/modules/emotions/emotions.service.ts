@@ -2,56 +2,64 @@ import { prisma } from '../../config/database.js';
 
 export async function getAllEmotions() {
   return prisma.emotion.findMany({
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
+    take: 100, // 🛡️ SAFETY LIMIT
     select: {
       id: true,
       name: true,
-      emoji: true
-    }
+      slug: true,
+      emoji: true,
+    },
   });
 }
 
 export async function getEmotionSuggestions(query: string, limit: number) {
   return prisma.emotion.findMany({
     where: {
-      name: {
-        contains: query
-      }
+      OR: [{ name: { contains: query } }, { slug: { contains: query } }],
     },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
     take: limit,
     select: {
       name: true,
-      emoji: true
-    }
+      slug: true,
+      emoji: true,
+    },
   });
 }
 
-export async function createEmotion(data: { name: string; emoji?: string }) {
+export async function createEmotion(data: {
+  name: string;
+  slug?: string;
+  emoji?: string;
+}) {
+  const slug =
+    data.slug || data.name.toLowerCase().trim().replace(/\s+/g, "_");
 
   const existing = await prisma.emotion.findFirst({
-    where: { name: data.name }
+    where: { OR: [{ name: data.name }, { slug }] },
   });
 
   if (existing) {
-    throw new Error("Emotion already exists");
+    throw new Error("Emotion with same name or slug already exists");
   }
 
   return prisma.emotion.create({
     data: {
       name: data.name,
-      emoji: data.emoji
-    }
+      slug,
+      emoji: data.emoji,
+    },
   });
 }
 
 export async function updateEmotion(
   id: bigint,
-  data: { name?: string; emoji?: string }
+  data: { name?: string; slug?: string; emoji?: string }
 ) {
   return prisma.emotion.update({
     where: { id },
-    data
+    data,
   });
 }
 

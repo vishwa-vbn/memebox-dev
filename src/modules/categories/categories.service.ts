@@ -3,6 +3,7 @@ import { prisma } from '../../config/database.js';
 export async function getAllCategories() {
   return prisma.category.findMany({
     orderBy: { name: 'asc' },
+    take: 100, // 🛡️ SAFETY LIMIT
     select: {
       id: true,
       name: true,

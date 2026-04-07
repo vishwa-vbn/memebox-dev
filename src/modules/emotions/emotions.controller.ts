@@ -18,7 +18,7 @@ export async function getEmotionSuggestions(
 }
 
 export async function createEmotion(
-  req: FastifyRequest<{ Body: { name: string; emoji?: string } }>,
+  req: FastifyRequest<{ Body: { name: string; slug?: string; emoji?: string } }>,
   reply: FastifyReply
 ) {
   const emotion = await service.createEmotion(req.body);
@@ -26,7 +26,10 @@ export async function createEmotion(
 }
 
 export async function updateEmotion(
-  req: FastifyRequest<{ Params: { id: string }; Body: { name?: string; emoji?: string } }>,
+  req: FastifyRequest<{
+    Params: { id: string };
+    Body: { name?: string; slug?: string; emoji?: string };
+  }>,
   reply: FastifyReply
 ) {
   const emotion = await service.updateEmotion(BigInt(req.params.id), req.body);

@@ -52,22 +52,6 @@ export async function search(
     // --- Parse nsfw flag ---
     const nsfw = nsfwStr === 'true';
 
-    // --- Validate: at least one real filter must be present ---
-    const hasFilters =
-      normQ ||
-      normEmotion ||
-      normCategory ||
-      normType ||
-      tags.length > 0;
-
-    if (!hasFilters) {
-      return reply.status(400).send({
-        error: 'Bad Request',
-        message:
-          'At least one search parameter is required: q, emotion, category, tag, or mediaType'
-      });
-    }
-
     // --- Validate mediaType if provided ---
     if (normType && !['GIF', 'STICKER', 'MEME'].includes(normType)) {
       return reply.status(400).send({
@@ -76,6 +60,9 @@ export async function search(
       });
     }
 
+    const user = (req as any).user;
+
+    // No filter = browse-all mode (returns all non-NSFW media ordered by views)
     const results = await service.searchMedia({
       q:         normQ,
       emotion:   normEmotion,
@@ -85,7 +72,7 @@ export async function search(
       nsfw,
       page,
       limit
-    });
+    }, user);
 
     return reply.status(200).send(results);
   } catch (err: any) {

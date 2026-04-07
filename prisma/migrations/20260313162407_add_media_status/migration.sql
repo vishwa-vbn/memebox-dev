@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `Media` ADD COLUMN `status` ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    ADD COLUMN `submittedById` BIGINT NULL;
+
+-- AddForeignKey
+ALTER TABLE `Media` ADD CONSTRAINT `Media_submittedById_fkey` FOREIGN KEY (`submittedById`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

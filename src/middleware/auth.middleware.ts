@@ -11,6 +11,10 @@ export async function authMiddleware(
     "/auth/login",
     "/media/trending",
     "/search",
+    "/globals",
+    "/auth/password/reset-request",
+    "/auth/password/reset",
+    "/contact/create"
   ];
 
 
@@ -30,10 +34,7 @@ if (req.method === "GET" && req.url.startsWith("/emotions")) return;
     return;
   }
 
-  // ✅ allow public like endpoint
-  if (req.method === "POST" && req.url.match(/^\/media\/\d+\/like$/)) {
-    return;
-  }
+
 
   const authHeader = req.headers.authorization;
 

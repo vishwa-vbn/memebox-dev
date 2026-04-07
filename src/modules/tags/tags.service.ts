@@ -1,6 +1,6 @@
 import { prisma } from '../../config/database.js';
 
-export async function getPopularTags(take = 50) {
+export async function getPopularTags(take = 100) {
   return prisma.tag.findMany({
     orderBy: { usageCount: 'desc' },
     take,
@@ -11,17 +11,17 @@ export async function getPopularTags(take = 50) {
 export async function getTagSuggestions(query: string, limit: number) {
   return prisma.tag.findMany({
     where: {
-      name: { contains: query } // case-insensitive depends on DB collation
+      OR: [{ name: { contains: query } }, { slug: { contains: query } }],
     },
-    orderBy: { usageCount: 'desc' },
+    orderBy: { usageCount: "desc" },
     take: limit,
-    select: { name: true, usageCount: true }
+    select: { name: true, slug: true, usageCount: true },
   });
 }
 
-
 export async function createTag(data: { name: string; slug?: string }) {
-  const slug = data.slug || data.name.toLowerCase().replace(/\s+/g, '-');
+  const slug =
+    data.slug || data.name.toLowerCase().trim().replace(/\s+/g, "_");
   return prisma.tag.create({ data: { name: data.name, slug } });
 }
 

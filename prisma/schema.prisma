@@ -8,56 +8,107 @@ datasource db {
 }
 
 model User {
-  id           BigInt   @id @default(autoincrement())
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @db.VarChar(255)
-  role         Role     @default(SUPREMEADMIN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            BigInt    @id @default(autoincrement())
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @db.VarChar(255)
+  role          Role      @default(USER)
+  isEmailVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
+
+  emailVerificationOtp    String?   @db.VarChar(6)
+  emailVerificationOtpExpiresAt DateTime?
+
+  passwordResetToken      String?   @db.VarChar(100)
+  passwordResetTokenExpiresAt DateTime?
+
+  credits            Int @default(0)
+  totalCreditsEarned Int @default(0)
+  creditTransactions CreditTransaction[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  likes         MediaLike[]
+  submissions   Media[]
+  views         MediaView[]
+  contacts      Contact[]
 }
 
 enum Role {
   SUPREMEADMIN
+  USER
 }
 
 model Media {
-  id              BigInt    @id @default(autoincrement())
-  imagekitFileId  String?   @db.VarChar(255)
+  id BigInt @id @default(autoincrement())
+  imagekitFileId String? @db.VarChar(255)
+  title String? @db.VarChar(255)
+  description String?
+  mediaType MediaType
+  fileUrl String @db.VarChar(500)
+  thumbnailUrl String? @db.VarChar(500)
+  previewUrl String? @db.VarChar(500)
+  width Int?
+  height Int?
+  duration Float?
+  fileSize Int?
 
-  title           String?   @db.VarChar(255)
-  description     String?
+  categoryId BigInt?
+  submittedById BigInt?
 
-  mediaType       MediaType
 
-  fileUrl         String    @db.VarChar(500)
-  thumbnailUrl    String?   @db.VarChar(500)
-  previewUrl      String?   @db.VarChar(500)
 
-  width           Int?
-  height          Int?
-  duration        Float?
-  fileSize        Int?
+  status MediaStatus @default(PENDING)
+  isNsfw Boolean @default(false)
 
-  categoryId      BigInt?
-  isNsfw          Boolean   @default(false)
+  views Int @default(0)
+  downloads Int @default(0)
+  shares Int @default(0)
+  likes Int @default(0)
 
-  views           Int       @default(0)
-  downloads       Int       @default(0)
-  shares          Int       @default(0)
-  likes           Int       @default(0)
+  likesList MediaLike[]
+  viewsList MediaView[]
+  creditTransactions CreditTransaction[]
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  submittedBy User? @relation(fields: [submittedById], references: [id])
 
-  category        Category? @relation(fields: [categoryId], references: [id])
-  tags            MediaTag[]
-  emotions        MediaEmotion[]
-  analytics       MediaAnalytic[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category Category? @relation(fields: [categoryId], references: [id])
+  tags MediaTag[]
+  emotions MediaEmotion[]
+  analytics MediaAnalytic[]
 
   @@index([mediaType])
   @@index([categoryId])
   @@index([views, downloads])
   @@index([title])
+}
+
+model MediaView {
+  id          BigInt   @id @default(autoincrement())
+  mediaId     BigInt
+  userId      BigInt?
+  ipAddress   String?  @db.VarChar(45)
+  fingerprint String?  @db.VarChar(64)
+  viewedAt    DateTime @default(now())
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([mediaId, userId])
+  @@unique([mediaId, fingerprint])
+
+  @@index([mediaId])
+}
+
+
+
+enum MediaStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum MediaType {
@@ -69,7 +120,7 @@ enum MediaType {
 model Tag {
   id         BigInt   @id @default(autoincrement())
   name       String   @unique @db.VarChar(100)
-  slug       String?  @db.VarChar(100)
+  slug       String   @unique @db.VarChar(100)
   usageCount Int      @default(0)
 
   media      MediaTag[]
@@ -97,9 +148,10 @@ model Category {
 }
 
 model Emotion {
-  id     BigInt      @id @default(autoincrement())
-  name   String      @db.VarChar(50)
-  emoji  String?     @db.VarChar(10)
+  id     BigInt @id @default(autoincrement())
+  name   String @unique @db.VarChar(50)  
+  slug   String @unique @db.VarChar(50)
+  emoji  String? @db.VarChar(10)
 
   media  MediaEmotion[]
 }
@@ -137,4 +189,72 @@ model Ad {
   adScript  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model MediaLike {
+  id      BigInt @id @default(autoincrement())
+  mediaId BigInt
+  userId  BigInt
+
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, userId])
+}
+
+//////////////////////////////////////////////////////
+// 💰 CREDIT SYSTEM (NO REDEMPTION YET)
+//////////////////////////////////////////////////////
+
+enum CreditSource {
+  SUBMISSION_APPROVED
+  MEDIA_VIEW_MILESTONE
+  MEDIA_LIKE_MILESTONE
+  OTHER
+}
+
+model CreditTransaction {
+  id          BigInt       @id @default(autoincrement())
+  userId      BigInt
+  amount      Int
+  source      CreditSource
+  description String?      @db.VarChar(200)
+  mediaId     BigInt?
+  createdAt   DateTime     @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media       Media?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([source])
+}
+
+//////////////////////////////////////////////////////
+// 📩 CONTACT SYSTEM
+//////////////////////////////////////////////////////
+
+enum ContactStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model Contact {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt?
+  name      String   @db.VarChar(100)
+  email     String   @db.VarChar(255)
+  subject   String   @db.VarChar(200)
+  message   String
+  status    ContactStatus @default(OPEN)
+  adminNote String?  @db.VarChar(500)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([status])
 }

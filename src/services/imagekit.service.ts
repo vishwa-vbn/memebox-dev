@@ -18,3 +18,7 @@ export async function uploadToImageKit(file: any, fileName: string) {
     thumbnailUrl: response.thumbnailUrl,
   };
 }
+
+export async function deleteFromImageKit(fileId: string) {
+  await imagekit.deleteFile(fileId);
+}
