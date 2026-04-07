@@ -147,11 +147,7 @@ const app = fastify({
 });
 
 app.register(cors, {
-  origin: [
-    process.env.FRONTENDDOMAIN || 'http://localhost:5173',
-    'http://localhost:5173',
-    'http://localhost:3000',
-  ],
+  origin: true, // ✅ Allows all origins, fixing Vercel CORS issues dynamically
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
 });
